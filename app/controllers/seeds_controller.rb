@@ -1,5 +1,5 @@
 class SeedsController < ApplicationController
-  before_action :authenticate_member!, except: [:index, :show]
+  before_action :authenticate_member!, except: %i(index show)
   load_and_authorize_resource
   respond_to :html, :json
   respond_to :csv, only: :index
@@ -19,6 +19,7 @@ class SeedsController < ApplicationController
   # GET /seeds/1
   # GET /seeds/1.json
   def show
+    @photos = @seed.photos.includes(:owner).order(created_at: :desc).paginate(page: params[:page])
     respond_with(@seed)
   end
 
@@ -75,7 +76,7 @@ class SeedsController < ApplicationController
       crop.seeds
     else
       Seed
-    end.includes(:owner, :crop).paginate(page: params[:page])
+    end.order(created_at: :desc).includes(:owner, :crop).paginate(page: params[:page])
   end
 
   def csv_filename
